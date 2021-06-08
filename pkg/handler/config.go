@@ -192,9 +192,46 @@ func (h configHandler) Search(bindDN string, searchReq ldap.SearchRequest, conn 
 	if err != nil {
 		return ldap.ServerSearchResult{ResultCode: ldap.LDAPResultOperationsError}, fmt.Errorf("Search Error: error parsing filter: %s", searchReq.Filter)
 	}
+	h.log.V(6).Info(fmt.Sprintf("filterEntity: %#v", filterEntity))
 	switch filterEntity {
 	default:
 		return ldap.ServerSearchResult{ResultCode: ldap.LDAPResultOperationsError}, fmt.Errorf("Search Error: unhandled filter type: %s [%s]", filterEntity, searchReq.Filter)
+	case "user":
+		for _, u := range h.cfg.Users {
+			attrs := []*ldap.EntryAttribute{}
+
+			fullName := fmt.Sprintf("%s %s", u.GivenName, u.SN)
+
+			attrs = append(attrs, &ldap.EntryAttribute{Name: "cn", Values: []string{fullName}})
+			if len(u.GivenName) > 0 {
+				attrs = append(attrs, &ldap.EntryAttribute{Name: "givenName", Values: []string{u.GivenName}})
+			}
+
+			if len(u.SN) > 0 {
+				attrs = append(attrs, &ldap.EntryAttribute{Name: "sn", Values: []string{u.SN}})
+			}
+
+			if len(u.Mail) > 0 {
+				attrs = append(attrs, &ldap.EntryAttribute{Name: "mail", Values: []string{u.Mail}})
+			}
+
+			if len(u.AccountControl) > 0 {
+				attrs = append(attrs, &ldap.EntryAttribute{Name: "userAccountControl", Values: []string{u.AccountControl}})
+			} else {
+				attrs = append(attrs, &ldap.EntryAttribute{Name: "userAccountControl", Values: []string{"512"}})
+			}
+
+			attrs = append(attrs, &ldap.EntryAttribute{Name: "objectClass", Values: []string{"top", "person", "organizationalPerson", "user"}})
+			attrs = append(attrs, &ldap.EntryAttribute{Name: "objectCategory", Values: []string{"person"}})
+
+			attrs = append(attrs, &ldap.EntryAttribute{Name: "memberOf", Values: h.getGroupDNs(append(u.OtherGroups, u.PrimaryGroup))})
+
+			attrs = append(attrs, &ldap.EntryAttribute{Name: "sAMAccountName", Values: []string{u.Name}})
+			attrs = append(attrs, &ldap.EntryAttribute{Name: "sAMAccountType", Values: []string{"805306368"}})
+
+			dn := fmt.Sprintf("%s=%s,%s=Users,%s", h.cfg.Backend.NameFormat, u.Name, h.cfg.Backend.GroupFormat, h.cfg.Backend.BaseDN)
+			entries = append(entries, &ldap.Entry{DN: dn, Attributes: attrs})
+		}
 	case "posixgroup":
 		for _, g := range h.cfg.Groups {
 			attrs := []*ldap.EntryAttribute{}

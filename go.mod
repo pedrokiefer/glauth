@@ -10,6 +10,7 @@ require (
 	github.com/go-logr/logr v0.4.0
 	github.com/hydronica/toml v0.4.2
 	github.com/jinzhu/copier v0.0.0-20190924061706-b57f9002281a
+	github.com/jteeuwen/go-bindata v3.0.7+incompatible // indirect
 	github.com/nmcclain/asn1-ber v0.0.0-20170104154839-2661553a0484 // indirect
 	github.com/nmcclain/ldap v0.0.0-20191021200707-3b3b69a7e9e3
 	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7

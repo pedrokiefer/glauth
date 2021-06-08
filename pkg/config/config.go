@@ -37,21 +37,22 @@ type API struct {
 	TLS         bool
 }
 type User struct {
-	Name          string
-	OtherGroups   []int
-	PassSHA256    string
-	PassAppSHA256 []string
-	PrimaryGroup  int
-	SSHKeys       []string
-	OTPSecret     string
-	Yubikey       string
-	Disabled      bool
-	UnixID        int
-	Mail          string
-	LoginShell    string
-	GivenName     string
-	SN            string
-	Homedir       string
+	Name           string
+	OtherGroups    []int
+	PassSHA256     string
+	PassAppSHA256  []string
+	PrimaryGroup   int
+	SSHKeys        []string
+	OTPSecret      string
+	Yubikey        string
+	Disabled       bool
+	UnixID         int
+	Mail           string
+	LoginShell     string
+	GivenName      string
+	SN             string
+	Homedir        string
+	AccountControl string
 }
 type Group struct {
 	Name          string
